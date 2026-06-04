@@ -1,0 +1,27 @@
+# EyeSpeaks Requirements
+# Install: pip install -r requirements.txt
+
+# Core
+opencv-python>=4.8.0
+mediapipe>=0.10.0
+numpy>=1.24.0
+PyQt6>=6.5.0
+pyautogui>=0.9.54
+
+# Audio
+sounddevice>=0.4.6
+
+# STT — Option 1: faster-whisper (BEST, offline, works on CPU)
+faster-whisper>=1.0.0
+
+# STT — Option 2: Vosk (offline Indian English)
+# Download model from: https://alphacephei.com/vosk/models
+# vosk>=0.3.45
+
+# STT — Option 3: Google SR (online fallback)
+SpeechRecognition>=3.10.0
+
+# AI Assistant (Ollama — install separately)
+# 1. Download Ollama from https://ollama.com/download
+# 2. Run: ollama pull mistral
+# No pip package needed — uses local HTTP API on port 11434
