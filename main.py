@@ -1,16 +1,11 @@
 """
-EyeSpeaks Main Application - COMPLETE FIXED VERSION
+EyeSpeaks Main Application - COMPLETE WITH API KEY
 ====================================================
-✅ All imports fixed
-✅ Thread-safe voice system
-✅ Original sci-fi UI
-✅ Auto mic retry
-✅ Test voice button
 """
 
-# ─────────────────────────────────────────────────────────────────
-# IMPORTS - Sab kuch yahan hai
-# ─────────────────────────────────────────────────────────────────
+from dotenv import load_dotenv
+load_dotenv()
+
 import sys
 import os
 import time
@@ -31,26 +26,19 @@ print("="*50)
 print("EyeSpeaks Initializing...")
 print("="*50)
 
-# ─────────────────────────────────────────────────────────────────
-# PyAudio Check
-# ─────────────────────────────────────────────────────────────────
 def check_pyaudio():
-    """PyAudio properly installed hai ya nahi check karo"""
     try:
         import pyaudio
         print("✅ PyAudio OK")
         return True
     except ImportError:
         print("="*50)
-        print("❌ PyAudio missing! Yeh run karo:")
+        print("❌ PyAudio missing! Run:")
         print("   pip install pipwin")
         print("   pipwin install pyaudio")
         print("="*50)
         return False
 
-# ─────────────────────────────────────────────────────────────────
-# ICON RENDERER & WIDGETS (Original UI)
-# ─────────────────────────────────────────────────────────────────
 class IconRenderer:
     @staticmethod
     def draw(painter, icon_type, rect, color):
@@ -113,9 +101,6 @@ class SoundManager(QObject):
             for f, d in pattern: winsound.Beep(int(f), d); time.sleep(0.02)
         except: pass
 
-# ─────────────────────────────────────────────────────────────────
-# CAMERA WORKER
-# ────────────────────────────────────────────────────────────────
 class CameraWorker(QThread):
     sig_log    = pyqtSignal(str, str)
     sig_frame  = pyqtSignal(QImage)
@@ -176,16 +161,12 @@ class CameraWorker(QThread):
 
     def stop(self): self.running = False
 
-# ─────────────────────────────────────────────────────────────────
-# MAIN WINDOW (Thread-Safe Voice System)
-# ─────────────────────────────────────────────────────────────────
 class MainWindow(QMainWindow):
-    # Signal for thread-safe voice handling
     voice_signal = pyqtSignal(str, dict)
     
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("EYESPEAKS")
+        self.setWindowTitle("EYESPEAKS - AI EDITION")
         self.resize(1440, 920)
         self.setMinimumSize(1200, 800)
         self.sound = SoundManager()
@@ -196,7 +177,6 @@ class MainWindow(QMainWindow):
         self._setup_ui()
         self._apply_theme()
         
-        # Connect voice signal to main thread handler
         self.voice_signal.connect(self._handle_voice_in_main_thread)
         
         self._footer_timer = QTimer(self)
@@ -204,7 +184,6 @@ class MainWindow(QMainWindow):
         self._footer_timer.start(1000)
         self._tick_time()
         
-        # Check PyAudio at start
         check_pyaudio()
 
     def _apply_theme(self):
@@ -243,7 +222,6 @@ class MainWindow(QMainWindow):
         root_lay = QVBoxLayout(root); root_lay.setContentsMargins(0, 0, 0, 0); root_lay.setSpacing(0)
         body = QWidget(); body_lay = QHBoxLayout(body); body_lay.setContentsMargins(0, 0, 0, 0); body_lay.setSpacing(0)
 
-        # SIDEBAR
         sb = QFrame(); sb.setObjectName("Sidebar"); sb.setFixedWidth(270)
         sl = QVBoxLayout(sb); sl.setContentsMargins(20, 24, 20, 24); sl.setSpacing(16)
         logo_row = QHBoxLayout(); logo_row.setSpacing(10)
@@ -267,7 +245,6 @@ class MainWindow(QMainWindow):
         self.btn_recal.clicked.connect(lambda: [self.sound.play('button'), self.recalibrate()])
         sl.addWidget(self.btn_recal)
         
-        # ADD: Test Voice button (manual testing ke liye)
         self.btn_test = QPushButton("🎤  TEST VOICE")
         self.btn_test.setObjectName("BtnRecal")
         self.btn_test.setMinimumHeight(36)
@@ -294,7 +271,6 @@ class MainWindow(QMainWindow):
         sl.addStretch()
         body_lay.addWidget(sb)
 
-        # CENTER
         center = QWidget(); cl = QVBoxLayout(center); cl.setContentsMargins(20, 20, 20, 20); cl.setSpacing(16)
         top_row = QHBoxLayout(); top_row.setSpacing(16)
         wc = QFrame(); wc.setObjectName("Card")
@@ -323,7 +299,7 @@ class MainWindow(QMainWindow):
 
         ov = QFrame(); ov.setObjectName("Card")
         ovl = QVBoxLayout(ov); ovl.setContentsMargins(14,12,14,12); ovl.setSpacing(10)
-        ovl.addWidget(self._section_label("  PIPELINE STATUS"))
+        ovl.addWidget(self._section_label("◈  PIPELINE STATUS"))
         ov_items = QHBoxLayout(); ov_items.setSpacing(10)
         self.overview_labels = []
         steps = [("camera","WEBCAM"),("user","FACE DETECT"),("eye","EYE TRACK"),("blink","BLINK"),("cursor","CURSOR"),("mic","VOICE AI")]
@@ -358,7 +334,6 @@ class MainWindow(QMainWindow):
         body_lay.addWidget(center, 1)
         root_lay.addWidget(body, 1)
 
-        # FOOTER
         ft = QFrame(); ft.setObjectName("Footer"); ft.setFixedHeight(36)
         fl = QHBoxLayout(ft); fl.setContentsMargins(20,0,20,0)
         fl.addWidget(self._footer_text("EYESPEAKS  v1.0.0"))
@@ -370,7 +345,6 @@ class MainWindow(QMainWindow):
         fl.addWidget(self.lbl_time)
         root_lay.addWidget(ft)
 
-    # HELPERS
     def _divider(self):
         d = QFrame(); d.setFrameShape(QFrame.HLine); d.setStyleSheet("background: #1a2535; border: none; max-height: 1px;"); return d
     def _small_label(self, txt):
@@ -388,7 +362,6 @@ class MainWindow(QMainWindow):
         v = QLabel(value); v.setObjectName("BigValue");  lay.addWidget(v)
         return v, card
 
-    # ── LOGIC ──
     def start_system(self):
         self.btn_start.setEnabled(False); self.btn_stop.setEnabled(True)
         self.lbl_status.setText("● ONLINE"); self.lbl_status.setObjectName("StatusOn")
@@ -423,7 +396,6 @@ class MainWindow(QMainWindow):
         try:
             import speech_recognition as sr
             
-            # PyAudio check
             try:
                 import pyaudio
                 pa = pyaudio.PyAudio()
@@ -432,7 +404,6 @@ class MainWindow(QMainWindow):
                 self.log(f"PyAudio devices: {mic_count}", "info")
             except Exception as e:
                 self.log(f"PyAudio error: {e}", "error")
-                self.log("Install: pip install pipwin && pipwin install pyaudio", "error")
                 return
             
             mics = sr.Microphone.list_microphone_names()
@@ -447,15 +418,14 @@ class MainWindow(QMainWindow):
             from modules import VoiceRecognizer, SystemCommandExecutor
             self.sys_cmd = SystemCommandExecutor()
             
-            # THREAD-SAFE callback - sirf signal emit karo, main thread handle karega
             def on_voice(text, response):
                 try:
                     self.voice_signal.emit(text, response)
                 except Exception as e:
                     print(f"Voice signal error: {e}")
 
-            api_key = os.environ.get("GEMINI_API_KEY", "")
-            self.voice_obj = VoiceRecognizer(callback=on_voice, gemini_api_key=api_key)
+            # API key already embedded in VoiceRecognizer
+            self.voice_obj = VoiceRecognizer(callback=on_voice)
             
             if self.voice_obj._mic_ok:
                 self.voice_obj.start()
@@ -475,7 +445,6 @@ class MainWindow(QMainWindow):
             self._schedule_mic_retry()
 
     def _handle_voice_in_main_thread(self, text: str, response: dict):
-        """Yeh function MAIN THREAD mein chalta hai."""
         try:
             action = response.get("action", "UNKNOWN")
             params = response.get("params", {})
@@ -484,8 +453,8 @@ class MainWindow(QMainWindow):
             self.lbl_recog.setText(text)
             self.lbl_cmd.setText(msg)
             
-            self.log(f"Voice heard: '{text}'", "info")
-            self.log(f"AI Action: {action} | Params: {params}", "info")
+            self.log(f"Voice: '{text}'", "info")
+            self.log(f"AI → {action} | {params}", "info")
             
             if action and action not in ["UNKNOWN", "NONE", "ERROR"]:
                 if self.sys_cmd:
@@ -511,15 +480,13 @@ class MainWindow(QMainWindow):
             traceback.print_exc()
 
     def _manual_voice_test(self):
-        """Manual test - bina bole test karo ke AI kaam kar raha hai."""
         if not self.sys_cmd:
             from modules import SystemCommandExecutor
             self.sys_cmd = SystemCommandExecutor()
         
-        # Test: scroll down command manually send karo
-        test_response = {"action": "SCROLL", "params": {"direction": "down"}, "message": "Manual Test"}
-        self._handle_voice_in_main_thread("manual test scroll", test_response)
-        self.log("Manual test command sent!", "success")
+        test_response = {"action": "OPEN_APP", "params": {"app": "notepad"}, "message": "Manual Test"}
+        self._handle_voice_in_main_thread("manual test", test_response)
+        self.log("Manual test: Opening Notepad", "success")
 
     def _schedule_mic_retry(self):
         if self._mic_retry_count < 5:
@@ -582,9 +549,6 @@ class MainWindow(QMainWindow):
     def _tick_time(self):
         self.lbl_time.setText(time.strftime("%H:%M:%S"))
 
-# ─────────────────────────────────────────────────────────────────
-# ENTRY POINT
-# ─────────────────────────────────────────────────────────────────
 def main():
     os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
     app = QApplication(sys.argv); app.setStyle("Fusion")
